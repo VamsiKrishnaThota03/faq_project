@@ -4,6 +4,16 @@ from .serializers import FAQSerializer
 
 from django.core.cache import cache
 
+from googletrans import Translator
+
+translator = Translator()
+
+def translate_text(text, dest_lang):
+    try:
+        return translator.translate(text, dest=dest_lang).text
+    except:
+        return text
+
 class FAQListView(generics.ListAPIView):
     serializer_class = FAQSerializer
 
