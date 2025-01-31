@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'faq',
     'ckeditor',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
