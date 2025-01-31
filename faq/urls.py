@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import FAQViewSet
-
-router = DefaultRouter()
-router.register(r'faqs', FAQViewSet)
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('faq/', views.FAQListView.as_view(), name='faq-list'),
 ]
