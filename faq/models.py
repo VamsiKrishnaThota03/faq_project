@@ -9,7 +9,7 @@ def translate_text(text, dest_lang):
         return translator.translate(text, dest=dest_lang).text
     except:
         return text
-    
+
 
 class FAQ(models.Model):
     question = models.TextField()
