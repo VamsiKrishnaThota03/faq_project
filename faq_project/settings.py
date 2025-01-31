@@ -11,6 +11,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
