@@ -1,7 +1,7 @@
 ## Project Screenshots
 
 ### Screenshot at 10:52:01 PM
-![Screenshot at 10:52:01 PM](images/Screenshot%202025-02-01%20at%2010.52.01%20PM.png)
+![Screenshot at 10:52:01 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
 
 ### Screenshot at 10:58:05 PM
 ![Screenshot at 10:58:05 PM](images/Screenshot%202025-02-01%20at%2010.58.05%20PM.png)
