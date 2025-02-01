@@ -1,7 +1,13 @@
 """
 Django settings for faq_project.
 """
+from dotenv import load_dotenv
 from pathlib import Path
+import os
+
+
+load_dotenv()  # Load environment variables from .env file
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,7 +15,8 @@ SECRET_KEY = 'your-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['faq-project.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'faq-project.onrender.com']
+
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
@@ -27,14 +34,17 @@ INSTALLED_APPS = [
 ]
 
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # Replace with your Redis server URL
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://red-cuf4fu56l47c73fcu6e0:6379',  # Hardcoded Redis URL
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
