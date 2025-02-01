@@ -1,13 +1,13 @@
 ## Project Screenshots
 
-### Screenshot at 10:52:01 PM
-![Screenshot at 10:52:01 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
+### Admin Page
+![Admin Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
 
-### Screenshot at 10:58:05 PM
-![Screenshot at 10:58:05 PM](images/Screenshot%202025-02-01%20at%2010.58.05%20PM.png)
+### FAQ Page
+![Screenshot at 10:58:05 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.58.05%E2%80%AFPM.png)
 
-### Screenshot at 11:03:22 PM
-![Screenshot at 11:03:22 PM](images/Screenshot%202025-02-01%20at%2011.03.22%20PM.png)
+### Translations
+![Screenshot at 11:03:22 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
 
 # FAQ Project
 
