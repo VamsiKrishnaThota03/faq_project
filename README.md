@@ -1,3 +1,10 @@
+Sample Images:
+![Screenshot at 10:52:01 PM](images/Screenshot%202025-02-01%20at%2010.52.01%20PM.png)
+
+![Screenshot at 10:58:05 PM](images/Screenshot%202025-02-01%20at%2010.58.05%20PM.png)
+
+![Screenshot at 11:03:22 PM](images/Screenshot%202025-02-01%20at%2011.03.22%20PM.png)
+
 
 # FAQ Project
 
@@ -149,6 +156,4 @@ flake8 .
 
 ---
 
-Sample Images:
-![Screenshot of my project](images/Screenshot%202025-02-01%20at%2010.44.44%20PM.png)
 
