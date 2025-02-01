@@ -7,9 +7,6 @@ This project is designed to manage FAQs with multilingual support using Django, 
 1. [Installation Steps](#installation-steps)
 2. [API Usage Examples](#api-usage-examples)
 3. [Contribution Guidelines](#contribution-guidelines)
-4. [Git & Version Control](#git--version-control)
-5. [Deployment & Docker Support](#deployment--docker-support)
-6. [Future Deployment](#future-deployment)
 
 ## Installation Steps
 
@@ -131,7 +128,7 @@ GET http://localhost:8000/api/faqs/?lang=bn
 
 ## Contribution Guidelines
 
-We welcome contributions to the FAQ project! Here’s how you can contribute:
+I welcome contributions to the FAQ project! Here’s how you can contribute:
 
 1. Fork the repository.
 2. Clone your fork locally.
@@ -152,83 +149,3 @@ flake8 .
 
 ---
 
-## Git & Version Control
-
-### Commit Message Convention
-
-Use conventional commit messages to keep the history clear and maintainable. Here are some examples:
-
-- **feat**: Add multilingual FAQ model
-- **fix**: Improve translation caching
-- **docs**: Update README with API examples
-- **style**: Format code to comply with PEP8
-- **test**: Add unit tests for FAQ model
-- **refactor**: Refactor translation function for better performance
-
-### Example:
-
-```bash
-git commit -m "feat: Add multilingual FAQ model"
-```
-
----
-
-## Deployment & Docker Support
-
-### Dockerize the Application
-
-#### 1. Create a `Dockerfile`
-
-Create a `Dockerfile` in the root of your project directory:
-
-```Dockerfile
-# Use the official Python image
-FROM python:3.11-slim
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application
-COPY . .
-
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Run Django migrations
-RUN python manage.py migrate
-
-# Start the Django server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-```
-
-#### 2. Create a `docker-compose.yml`
-
-Create a `docker-compose.yml` file:
-
-```yaml
-version: '3'
-
-services:
-  web:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=path/to/google_credentials.json
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - redis
-
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-```
