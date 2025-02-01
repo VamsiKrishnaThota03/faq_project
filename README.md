@@ -9,6 +9,8 @@
 ### Translations
 ![Screenshot at 11:03:22 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
 
+![Screenshot at 11:03:22 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/image.png)
+
 # FAQ Project
 
 This project is designed to manage FAQs with multilingual support using Django, Django REST Framework, and `django-ckeditor` for WYSIWYG editor integration. It includes automatic translations for FAQs using the `deep-translator` API and implements Redis caching for efficient API responses.
