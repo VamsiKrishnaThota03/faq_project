@@ -17,6 +17,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'faq-project.onrender.com']
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
