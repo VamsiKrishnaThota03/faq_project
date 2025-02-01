@@ -15,9 +15,9 @@ SECRET_KEY = 'your-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'faq-project.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'faq-project.onrender.com']
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
@@ -35,15 +35,14 @@ INSTALLED_APPS = [
 ]
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://red-cuf4fu56l47c73fcu6e0:6379',  # Hardcoded Redis URL
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Use local Redis
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
-
 
 
 

@@ -149,3 +149,5 @@ flake8 .
 
 ---
 
+Sample Images:
+![Screenshot of my project](images/Screenshot%202025-02-01%20at%2010.44.44%20PM.png)
