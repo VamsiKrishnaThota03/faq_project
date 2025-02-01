@@ -9,7 +9,8 @@ SECRET_KEY = 'your-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['faq-project.onrender.com']
+
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
