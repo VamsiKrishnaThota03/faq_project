@@ -2,6 +2,11 @@ from rest_framework import generics
 from .models import FAQ
 from .serializers import FAQSerializer
 from django.core.cache import cache
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Welcome to the FAQ site!")
+
 
 class FAQListView(generics.ListAPIView):
     serializer_class = FAQSerializer
