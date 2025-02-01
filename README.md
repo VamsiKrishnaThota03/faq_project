@@ -1,4 +1,6 @@
-Sample Images:
+## Project Screenshots
+
+### Screenshot at 10:52:01 PM
 ![Screenshot at 10:52:01 PM](images/Screenshot%202025-02-01%20at%2010.52.01%20PM.png)
 
 ### Screenshot at 10:58:05 PM
