@@ -17,6 +17,7 @@ uploads/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Editors and OS files
 .vscode/
