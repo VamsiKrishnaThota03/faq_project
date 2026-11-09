@@ -1,5 +1,24 @@
+# Python bytecode and caches
 __pycache__/
-db.sqlite3
-env/
-.env
+*.py[cod]
+.pytest_cache/
 
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+uploads/
+
+# Environment variables
+.env
+.env.*
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
