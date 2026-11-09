@@ -1,34 +1,38 @@
 # FAQ Project
 
-A multilingual FAQ API built with Django REST Framework. FAQs are auto-translated into Hindi and Bengali, answers use a CKEditor rich-text editor, and responses are cached in Redis.
+A multilingual FAQ API and web page built with Django REST Framework. FAQs are auto-translated into Hindi and Bengali, answers use a CKEditor rich-text editor, and responses are cached (Redis, or in-memory when Redis isn't configured).
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)
-![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.15-A30000?logo=django&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.16-A30000?logo=django&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 
 ## Overview
 
-Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIWYG field. When an FAQ is saved, any missing Hindi (`hi`) or Bengali (`bn`) versions of the question and answer are filled in automatically through `deep-translator`'s Google Translator. If translation fails, the original text is kept. A public REST endpoint returns the FAQs in the language you request, and caches the result in Redis for 15 minutes per language.
+Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIWYG field. When an FAQ is saved, any empty Hindi (`hi`) or Bengali (`bn`) version of the question and answer is filled in automatically through `deep-translator`'s Google Translator. A public, read-only REST endpoint and a small web page return the FAQs in the language you ask for. Results are cached per language and the cache is cleared whenever an FAQ is created, edited or deleted.
+
+![FAQ home page](docs/screenshots/home-desktop.png)
 
 ## Features
 
 - **FAQ model** with `question`, a rich-text `answer` (CKEditor), and `question_hi`, `question_bn`, `answer_hi`, `answer_bn`
-- **Automatic translation on save**: only empty translation fields are filled, so manual edits are kept
+- **Automatic translation on save**: only empty translation fields are filled, so manual edits are kept. If you change the English text, translations you didn't edit are regenerated. If the translator is unreachable the field stays empty, English is shown, and translation is retried on the next save.
 - **Language selection** with `?lang=hi` or `?lang=bn`. In the response, `question` and `answer` are replaced with the translated text. Any other value, or no value, returns English.
-- **Redis caching** with `django-redis`, cache key `faqs_<lang>`, 15-minute timeout
-- **Django admin** listing questions with their Hindi and Bengali versions
-- **CKEditor upload URLs** mounted at `/ckeditor/`
-- **Unit test** that checks translated fields are returned by the model helpers
-- **Gunicorn `Procfile`** for platforms such as Render or Heroku
+- **Web page** at `/` with a language switcher, an accordion of questions, and an empty state
+- **Caching** of each language's list (`faqs_<lang>`, 15 minutes by default) in Redis when `REDIS_URL` is set, otherwise in local memory. Saving or deleting an FAQ clears it.
+- **HTML sanitising**: rich-text answers are cleaned with `nh3` (no scripts or event handlers) before they are returned
+- **Django admin** with search and separate English / Translations sections
+- **Tests** for translation, fallbacks, caching, sanitising and the API, with the translator mocked so no network is needed
+- **Gunicorn `Procfile`** and WhiteNoise static files for platforms such as Render or Heroku
 
 ## Tech stack
 
-- Python, Django 5.1, Django REST Framework 3.15
+- Python, Django 5.2 LTS, Django REST Framework 3.16
 - django-ckeditor 6.7
 - deep-translator (Google Translator backend)
-- Redis with django-redis
+- Redis with django-redis (optional)
+- nh3 (HTML sanitising), WhiteNoise (static files), python-dotenv
 - SQLite (default database)
 - Gunicorn
 
@@ -38,16 +42,21 @@ Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIW
 .
 ├── faq/
 │   ├── models.py        # FAQ model + translate-on-save logic
-│   ├── views.py         # FAQListView (cached, language-aware) + home view
+│   ├── views.py         # FAQListView (cached, language-aware) + home page
+│   ├── signals.py       # clears the cache when FAQs change
+│   ├── templates/faq/   # home page
+│   ├── static/faq/      # CSS + favicon
 │   ├── serializers.py
 │   ├── urls.py          # /api/faqs/
 │   ├── admin.py
 │   ├── tests.py
 │   └── migrations/
 ├── faq_project/
-│   ├── settings.py      # Apps, Redis cache, SQLite, allowed hosts
-│   └── urls.py          # admin/, ckeditor/, api/, /
-├── images/              # README screenshots
+│   ├── settings.py      # reads configuration from env vars / .env
+│   └── urls.py          # admin/, api/, /
+├── docs/screenshots/
+├── images/              # older screenshots
+├── .env.example
 ├── manage.py
 ├── requirements.txt
 └── Procfile
@@ -57,8 +66,8 @@ Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIW
 
 ### Prerequisites
 
-- Python 3.10+ (Django 5.1 requires it)
-- A Redis server running on `127.0.0.1:6379`
+- Python 3.10+ (Django 5.2 requires it)
+- Optional: a Redis server (otherwise an in-memory cache is used)
 - Internet access, which the Google Translator service needs when FAQs are saved
 
 ### Install
@@ -70,18 +79,23 @@ cd faq_project
 python3 -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env              # then edit .env
 ```
 
-### Configuration
+For local development put `DJANGO_DEBUG=true` in `.env`. With debug on, a dev-only secret key is used if `DJANGO_SECRET_KEY` is empty. With debug off the app refuses to start without `DJANGO_SECRET_KEY`.
 
-The project does not read environment variables yet (`load_dotenv()` is commented out in `settings.py`). These values are set directly in `faq_project/settings.py`:
+### Environment variables
 
-| Setting          | Current value                         | What to change for your setup                        |
-|------------------|---------------------------------------|------------------------------------------------------|
-| `SECRET_KEY`     | placeholder string                    | Set a unique secret, ideally loaded from an env var  |
-| `DEBUG`          | `True`                                | Set to `False` in production                         |
-| `ALLOWED_HOSTS`  | `localhost`, `127.0.0.1`, a Render host | Add your own domain                               |
-| `CACHES.LOCATION`| `redis://127.0.0.1:6379/1`            | Point to your Redis instance                         |
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `DJANGO_SECRET_KEY` | yes, unless `DJANGO_DEBUG=true` | none | Django secret key. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
+| `DJANGO_DEBUG` | no | `false` | `true` for local development only |
+| `DJANGO_ALLOWED_HOSTS` | no | `localhost,127.0.0.1` | Comma-separated host names, e.g. `faq-project.onrender.com` |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | for HTTPS admin logins behind a proxy | empty | Comma-separated origins, e.g. `https://faq-project.onrender.com` |
+| `DJANGO_SECURE_COOKIES` | no | `true` when debug is off | Set `false` only to test a non-debug build over plain HTTP |
+| `REDIS_URL` | no | empty (memory cache) | e.g. `redis://127.0.0.1:6379/1` |
+| `FAQ_CACHE_TIMEOUT` | no | `900` | Cache lifetime in seconds |
+| `SQLITE_PATH` | no | `./db.sqlite3` | SQLite database file |
 
 ### Database and admin user
 
@@ -93,24 +107,31 @@ python manage.py createsuperuser
 ### Run
 
 ```bash
-python manage.py runserver
+python manage.py runserver        # listens on 127.0.0.1:8000
 ```
 
+- Web page: <http://127.0.0.1:8000/>
 - API: <http://127.0.0.1:8000/api/faqs/>
 - Admin: <http://127.0.0.1:8000/admin/>
 
 ### Tests
 
 ```bash
-python manage.py test faq
+DJANGO_DEBUG=true python manage.py test faq
 ```
+
+### Deploying (Render, Heroku)
+
+- Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
+- Start command: `gunicorn faq_project.wsgi` (from the `Procfile`)
+- Set `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS`, and optionally `REDIS_URL`.
 
 ## API
 
 | Method | Path          | Query            | Purpose                                                  |
 |--------|---------------|------------------|----------------------------------------------------------|
-| GET    | `/`           |                  | Plain-text welcome page                                  |
-| GET    | `/api/faqs/`  | `lang=hi`, `lang=bn` (optional) | List all FAQs, with `question` and `answer` in the requested language |
+| GET    | `/`           | `lang=hi`, `lang=bn` (optional) | Web page listing the FAQs in the chosen language |
+| GET    | `/api/faqs/`  | `lang=hi`, `lang=bn` (optional) | List all FAQs, with `question` and `answer` in the requested language (read-only) |
 | GET    | `/admin/`     |                  | Django admin for managing FAQs                           |
 
 ```bash
@@ -135,23 +156,29 @@ Example response (`?lang=hi`):
 ]
 ```
 
-> The cache is not cleared when an FAQ changes, so new or edited FAQs can take up to 15 minutes to appear for a language that is already cached.
 
 ## Screenshots
 
-### Admin page
-![Admin Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
+### Home page (mobile, Hindi)
+<img src="docs/screenshots/home-mobile-hindi.png" alt="FAQ page in Hindi on a phone" width="300">
 
-### FAQ page
-![FAQ Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.58.05%E2%80%AFPM.png)
+### Admin page
+![Admin Page](images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
 
 ### Translations
-![Translations](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
+![Translations](images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
 
-![Translations API response](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/image.png)
+![Translations API response](images/image.png)
+
+## Known limitations
+
+- `django-ckeditor` bundles CKEditor 4, which is no longer supported upstream and has unfixed security issues (Django prints warning `ckeditor.W001`). Only staff use the editor, and answers are sanitised on output, but moving to `django-ckeditor-5` or another editor is recommended.
+- Translation uses the free Google Translate endpoint through `deep-translator`. It can be rate-limited, and it runs synchronously when an FAQ is saved.
+- Only Hindi and Bengali are supported. Adding a language needs new model fields and a migration.
+- The API returns every FAQ in one response (no pagination).
 
 ## Contributing
 
 1. Fork the repository and create a branch (`git checkout -b feature-xyz`).
-2. Make your changes and run `python manage.py test`.
+2. Make your changes and run `DJANGO_DEBUG=true python manage.py test faq`.
 3. Follow PEP 8, then open a pull request.
