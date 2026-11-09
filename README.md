@@ -1,164 +1,157 @@
-## Project Screenshots
-
-### Admin Page
-![Admin Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
-
-### FAQ Page
-![Screenshot at 10:58:05 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.58.05%E2%80%AFPM.png)
-
-### Translations
-![Screenshot at 11:03:22 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
-
-![Screenshot at 11:03:22 PM](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/image.png)
-
 # FAQ Project
 
-This project is designed to manage FAQs with multilingual support using Django, Django REST Framework, and `django-ckeditor` for WYSIWYG editor integration. It includes automatic translations for FAQs using the `deep-translator` API and implements Redis caching for efficient API responses.
+A multilingual FAQ API built with Django REST Framework. FAQs are auto-translated into Hindi and Bengali, answers use a CKEditor rich-text editor, and responses are cached in Redis.
 
-## Table of Contents
-1. [Installation Steps](#installation-steps)
-2. [API Usage Examples](#api-usage-examples)
-3. [Contribution Guidelines](#contribution-guidelines)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.15-A30000?logo=django&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 
-## Installation Steps
+## Overview
 
-### 1. Clone the repository
+Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIWYG field. When an FAQ is saved, any missing Hindi (`hi`) or Bengali (`bn`) versions of the question and answer are filled in automatically through `deep-translator`'s Google Translator. If translation fails, the original text is kept. A public REST endpoint returns the FAQs in the language you request, and caches the result in Redis for 15 minutes per language.
 
-Clone the project to your local machine using:
+## Features
 
-```bash
-git clone https://github.com/VamsiKrishnaThota03/faq_project
-cd faq-project
+- **FAQ model** with `question`, a rich-text `answer` (CKEditor), and `question_hi`, `question_bn`, `answer_hi`, `answer_bn`
+- **Automatic translation on save**: only empty translation fields are filled, so manual edits are kept
+- **Language selection** with `?lang=hi` or `?lang=bn`. In the response, `question` and `answer` are replaced with the translated text. Any other value, or no value, returns English.
+- **Redis caching** with `django-redis`, cache key `faqs_<lang>`, 15-minute timeout
+- **Django admin** listing questions with their Hindi and Bengali versions
+- **CKEditor upload URLs** mounted at `/ckeditor/`
+- **Unit test** that checks translated fields are returned by the model helpers
+- **Gunicorn `Procfile`** for platforms such as Render or Heroku
+
+## Tech stack
+
+- Python, Django 5.1, Django REST Framework 3.15
+- django-ckeditor 6.7
+- deep-translator (Google Translator backend)
+- Redis with django-redis
+- SQLite (default database)
+- Gunicorn
+
+## Project structure
+
+```
+.
+├── faq/
+│   ├── models.py        # FAQ model + translate-on-save logic
+│   ├── views.py         # FAQListView (cached, language-aware) + home view
+│   ├── serializers.py
+│   ├── urls.py          # /api/faqs/
+│   ├── admin.py
+│   ├── tests.py
+│   └── migrations/
+├── faq_project/
+│   ├── settings.py      # Apps, Redis cache, SQLite, allowed hosts
+│   └── urls.py          # admin/, ckeditor/, api/, /
+├── images/              # README screenshots
+├── manage.py
+├── requirements.txt
+└── Procfile
 ```
 
-### 2. Set up a virtual environment
+## Getting started
 
-Create a virtual environment and activate it:
+### Prerequisites
+
+- Python 3.10+ (Django 5.1 requires it)
+- A Redis server running on `127.0.0.1:6379`
+- Internet access, which the Google Translator service needs when FAQs are saved
+
+### Install
 
 ```bash
-# For macOS/Linux
+git clone https://github.com/VamsiKrishnaThota03/faq_project.git
+cd faq_project
+
 python3 -m venv venv
-source venv/bin/activate
-
-# For Windows
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 3. Install the required dependencies
-
-Install the project dependencies from the `requirements.txt`:
-
-```bash
+source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` includes:
-- `Django==5.1.5`
-- `djangorestframework==3.15.0`
-- `django-ckeditor==6.1.0`
-- `deep-translator==1.5.4`
-- `redis==4.5.1`
-- `django-redis==5.0.0`
-- `flake8==6.0.0`
-- `pytest==7.0.0`
+### Configuration
 
-### 4. Set up the environment variables
+The project does not read environment variables yet (`load_dotenv()` is commented out in `settings.py`). These values are set directly in `faq_project/settings.py`:
 
-Create a `.env` file in the root directory to store sensitive information such as your **Google API key** and **Redis configuration**. Example:
+| Setting          | Current value                         | What to change for your setup                        |
+|------------------|---------------------------------------|------------------------------------------------------|
+| `SECRET_KEY`     | placeholder string                    | Set a unique secret, ideally loaded from an env var  |
+| `DEBUG`          | `True`                                | Set to `False` in production                         |
+| `ALLOWED_HOSTS`  | `localhost`, `127.0.0.1`, a Render host | Add your own domain                               |
+| `CACHES.LOCATION`| `redis://127.0.0.1:6379/1`            | Point to your Redis instance                         |
 
-```ini
-GOOGLE_APPLICATION_CREDENTIALS=path/to/google_credentials.json
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-```
-
-Make sure to replace `path/to/google_credentials.json` with the actual path to your Google API credentials file.
-
-### 5. Run migrations
-
-Make sure the database schema is up to date by running:
+### Database and admin user
 
 ```bash
-python manage.py makemigrations
 python manage.py migrate
+python manage.py createsuperuser
 ```
 
-### 6. Run the development server
-
-Start the server:
+### Run
 
 ```bash
 python manage.py runserver
 ```
 
-Your Django app should now be running on `http://127.0.0.1:8000/`.
+- API: <http://127.0.0.1:8000/api/faqs/>
+- Admin: <http://127.0.0.1:8000/admin/>
 
----
-
-## API Usage Examples
-
-### 1. FAQ API Endpoint
-
-You can interact with the API to get FAQ data by querying the `/api/faqs/` endpoint.
-
-#### Example 1: Get FAQs in English (default)
+### Tests
 
 ```bash
-GET http://localhost:8000/api/faqs/
+python manage.py test faq
 ```
 
-#### Example 2: Get FAQs in Hindi
+## API
+
+| Method | Path          | Query            | Purpose                                                  |
+|--------|---------------|------------------|----------------------------------------------------------|
+| GET    | `/`           |                  | Plain-text welcome page                                  |
+| GET    | `/api/faqs/`  | `lang=hi`, `lang=bn` (optional) | List all FAQs, with `question` and `answer` in the requested language |
+| GET    | `/admin/`     |                  | Django admin for managing FAQs                           |
 
 ```bash
-GET http://localhost:8000/api/faqs/?lang=hi
+curl http://localhost:8000/api/faqs/            # English (default)
+curl http://localhost:8000/api/faqs/?lang=hi    # Hindi
+curl http://localhost:8000/api/faqs/?lang=bn    # Bengali
 ```
 
-#### Example 3: Get FAQs in Bengali
-
-```bash
-GET http://localhost:8000/api/faqs/?lang=bn
-```
-
-#### Example Response
+Example response (`?lang=hi`):
 
 ```json
 [
-    {
-        "id": 1,
-        "question": "What is Django?",
-        "answer": "Django is a web framework.",
-        "question_hi": "डjango क्या है?",
-        "question_bn": "ডjango কী?",
-        "answer_hi": "Django एक वेब फ्रेमवर्क है।",
-        "answer_bn": "Django একটি ওয়েব ফ্রেমওয়ার্ক।"
-    }
+  {
+    "id": 1,
+    "question": "Django क्या है?",
+    "answer": "Django एक वेब फ्रेमवर्क है।",
+    "question_hi": "Django क्या है?",
+    "question_bn": "Django কী?",
+    "answer_hi": "Django एक वेब फ्रेमवर्क है।",
+    "answer_bn": "Django একটি ওয়েব ফ্রেমওয়ার্ক।"
+  }
 ]
 ```
 
----
+> The cache is not cleared when an FAQ changes, so new or edited FAQs can take up to 15 minutes to appear for a language that is already cached.
 
-## Contribution Guidelines
+## Screenshots
 
-I welcome contributions to the FAQ project! Here’s how you can contribute:
+### Admin page
+![Admin Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.52.01%E2%80%AFPM.png)
 
-1. Fork the repository.
-2. Clone your fork locally.
-3. Create a new branch (`git checkout -b feature-xyz`).
-4. Implement your changes.
-5. Run tests and ensure everything works correctly.
-6. Commit your changes with clear commit messages.
-7. Push your changes (`git push origin feature-xyz`).
-8. Create a pull request.
+### FAQ page
+![FAQ Page](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2010.58.05%E2%80%AFPM.png)
 
-### Code Style
-- Follow **PEP8** guidelines for Python code.
-- Ensure that your code passes **flake8** linting:
+### Translations
+![Translations](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/Screenshot%202025-02-01%20at%2011.03.22%E2%80%AFPM.png)
 
-```bash
-flake8 .
-```
+![Translations API response](https://raw.githubusercontent.com/VamsiKrishnaThota03/faq_project/refs/heads/main/images/image.png)
 
----
+## Contributing
 
-
+1. Fork the repository and create a branch (`git checkout -b feature-xyz`).
+2. Make your changes and run `python manage.py test`.
+3. Follow PEP 8, then open a pull request.
