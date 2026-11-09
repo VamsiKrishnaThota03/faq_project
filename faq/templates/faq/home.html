@@ -1,0 +1,65 @@
+{% load static %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frequently asked questions</title>
+  <meta name="description" content="Multilingual FAQ in English, Hindi and Bengali.">
+  <link rel="icon" href="{% static 'faq/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'faq/style.css' %}">
+</head>
+<body>
+  <a class="skip-link" href="#faqs">Skip to questions</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{% url 'home' %}">
+        <img src="{% static 'faq/favicon.svg' %}" alt="" width="28" height="28">
+        <span>FAQ</span>
+      </a>
+      <nav aria-label="Developer links" class="header-links">
+        <a href="{% url 'faq-list' %}?lang={{ lang }}">API</a>
+        <a href="{% url 'admin:index' %}">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Frequently asked questions</h1>
+      <p class="lead">Answers in English, Hindi and Bengali. Translations are generated automatically when an FAQ is saved.</p>
+
+      <nav class="lang-switch" aria-label="Choose language">
+        {% for code, name in languages %}
+          <a href="?lang={{ code }}" lang="{{ code }}" class="lang-pill{% if code == lang %} is-active{% endif %}"{% if code == lang %} aria-current="true"{% endif %}>{{ name }}</a>
+        {% endfor %}
+      </nav>
+    </section>
+
+    <section id="faqs" class="faq-list" aria-live="polite">
+      {% if faqs %}
+        <p class="count">{{ faqs|length }} question{{ faqs|length|pluralize }}</p>
+        {% for faq in faqs %}
+          <details class="faq"{% if forloop.first %} open{% endif %}>
+            <summary>
+              <span class="q">{{ faq.question }}</span>
+              <span class="chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="answer">{{ faq.answer|safe }}</div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <div class="empty">
+          <h2>No FAQs yet</h2>
+          <p>Sign in to the <a href="{% url 'admin:index' %}">admin</a> and add the first question. Hindi and Bengali versions are filled in for you.</p>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>JSON API: <code>GET {% url 'faq-list' %}?lang=en|hi|bn</code></span>
+    </div>
+  </footer>
+</body>
+</html>
