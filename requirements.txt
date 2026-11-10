@@ -1,6 +1,5 @@
 Django==5.2.19
 djangorestframework==3.16.1
-django-ckeditor==6.7.4
 deep-translator==1.11.4
 django-redis==5.4.0
 redis==5.2.1

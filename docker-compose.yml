@@ -1,0 +1,47 @@
+# Local run of the FAQ API under gunicorn, with the Redis cache it uses.
+#
+# Both published ports bind to 127.0.0.1, so neither service is reachable from
+# the local network. The app reaches Redis over the compose network; the Redis
+# publish is only a convenience for redis-cli.
+#
+#   printf 'DJANGO_SECRET_KEY=%s\nREDIS_PASSWORD=%s\n' \
+#     "$(python3 -c 'import secrets;print(secrets.token_urlsafe(64))')" \
+#     "$(openssl rand -hex 16)" > .env
+#   docker compose up --build
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Redis defaults to no authentication; require a password even on a private
+    # network, so a misconfigured publish is not immediately exploitable.
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      DJANGO_DEBUG: 'false'
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY in .env}
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      REDIS_URL: redis://:${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}@redis:6379/1
+      # Reached over plain HTTP on loopback, so the HTTPS redirect and secure
+      # cookie flags would make it unusable locally.
+      DJANGO_SSL_REDIRECT: 'false'
+      DJANGO_SECURE_COOKIES: 'false'
+      DJANGO_HSTS_SECONDS: '0'
+    ports:
+      - "127.0.0.1:8000:8000"

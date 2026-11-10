@@ -8,6 +8,10 @@ A multilingual FAQ API and web page built with Django REST Framework. FAQs are a
 ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 
+[![CI](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/ci.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/codeql.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ## Overview
 
 Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIWYG field. When an FAQ is saved, any empty Hindi (`hi`) or Bengali (`bn`) version of the question and answer is filled in automatically through `deep-translator`'s Google Translator. A public, read-only REST endpoint and a small web page return the FAQs in the language you ask for. Results are cached per language and the cache is cleared whenever an FAQ is created, edited or deleted.
@@ -182,3 +186,62 @@ Example response (`?lang=hi`):
 1. Fork the repository and create a branch (`git checkout -b feature-xyz`).
 2. Make your changes and run `DJANGO_DEBUG=true python manage.py test faq`.
 3. Follow PEP 8, then open a pull request.
+
+
+## Deployment security
+
+`python manage.py check --deploy` reported `SECURE_HSTS_SECONDS` and
+`SECURE_SSL_REDIRECT` as unset (`security.W004`, `security.W008`). Both are now
+configured, along with `SESSION_COOKIE_HTTPONLY`, `SameSite=Lax` on both
+cookies, `SECURE_CONTENT_TYPE_NOSNIFF`, `X_FRAME_OPTIONS = DENY` and
+`SECURE_REFERRER_POLICY`.
+
+They sit inside `if not DEBUG` and each is overridable by an environment
+variable, deliberately: **enabling HSTS is effectively irreversible** for the
+length of `max-age`, because a browser that has seen the header refuses plain
+HTTP to that host until it expires. Someone deploying onto a plain-HTTP host
+needs to turn it off up front rather than discover the lockout afterwards.
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `DJANGO_SSL_REDIRECT` | `true` | Set `false` behind a proxy that already redirects |
+| `DJANGO_HSTS_SECONDS` | `31536000` | Set `0` to disable |
+| `DJANGO_HSTS_INCLUDE_SUBDOMAINS` | `true` | |
+| `DJANGO_HSTS_PRELOAD` | **`false`** | Left off on purpose — browser preload submission is permanent |
+| `DJANGO_SECURE_COOKIES` | `true` | Set `false` only for plain-HTTP local runs |
+
+`check --deploy` is now completely clean. The resulting `W021` preload warning
+is acknowledged via `SILENCED_SYSTEM_CHECKS`, scoped to that single check and
+**conditional** — it disappears the moment `DJANGO_HSTS_PRELOAD=true` is set.
+Acknowledging it beats leaving a standing warning, because a check that always
+prints something trains everyone to stop reading it.
+
+CI runs `check --deploy --fail-level WARNING`, so any genuinely new warning
+fails the build, and a second step enables preload to prove the silence is
+conditional rather than a blanket suppression.
+
+## Continuous integration
+
+| Job | What it proves |
+| --- | --- |
+| `test` (Python 3.11, 3.12) | `manage.py check`, that no migration is missing (`makemigrations --check`), and the test suite |
+| `deploy-check` | `check --deploy --fail-level WARNING` is clean, and a missing `DJANGO_SECRET_KEY` stops the app rather than falling back to the insecure local key |
+| `docker` | The image builds |
+
+CodeQL runs over Python weekly and on every push; Dependabot watches pip,
+Actions and the Dockerfile.
+
+## Docker
+
+```bash
+printf 'DJANGO_SECRET_KEY=%s\n' \
+  "$(python3 -c 'import secrets;print(secrets.token_urlsafe(64))')" > .env
+
+docker compose up --build
+open http://localhost:8000
+```
+
+Runs under gunicorn as a non-root user, with static files collected at build
+time so the container needs no write access to the image. The port publishes to
+`127.0.0.1` only; gunicorn binds all interfaces *inside* the container, which is
+correct — the publish is the security boundary.
