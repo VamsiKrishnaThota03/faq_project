@@ -8,8 +8,8 @@ A multilingual FAQ API and web page built with Django REST Framework. FAQs are a
 ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 
-[![CI](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/ci.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/codeql.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/faq_project/actions/workflows/codeql.yml)
+[![CI](https://github.com/VamsiKrishnaThota03/multilingual-faq-api/actions/workflows/ci.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/multilingual-faq-api/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/VamsiKrishnaThota03/multilingual-faq-api/actions/workflows/codeql.yml/badge.svg)](https://github.com/VamsiKrishnaThota03/multilingual-faq-api/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Overview
@@ -77,7 +77,7 @@ Admins create FAQs in the Django admin. Answers are edited with a CKEditor WYSIW
 ### Install
 
 ```bash
-git clone https://github.com/VamsiKrishnaThota03/faq_project.git
+git clone https://github.com/VamsiKrishnaThota03/multilingual-faq-api.git
 cd faq_project
 
 python3 -m venv venv
