@@ -6,5 +6,5 @@ redis==5.2.1
 requests==2.34.2
 python-dotenv==1.2.4
 whitenoise==6.9.0
-gunicorn==23.0.0
+gunicorn==26.2.0
 nh3==0.3.7
