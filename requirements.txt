@@ -1,7 +1,7 @@
 Django==5.2.19
 djangorestframework==3.16.1
 deep-translator==1.11.4
-django-redis==5.4.0
+django-redis==7.0.0
 redis==5.2.1
 requests==2.34.2
 python-dotenv==1.2.4
